@@ -195,7 +195,13 @@ const GameClient = {
     // Показ экрана выбора уровней
     showLevelsScreen: function() {
         // Формируем сетку уровней
+        console.log('Запуск showLevelsScreen...');
+        console.log('Состояние прогресса:', this.state.progress);
         const levelsGrid = document.getElementById('levels-grid');
+        if (!levelsGrid) {
+        console.error('Элемент levels-grid не найден!');
+        return;
+    }
         levelsGrid.innerHTML = '';
 
         this.levels.forEach(level => {
@@ -459,6 +465,8 @@ const GameClient = {
                 this.state.roomId = data.roomId;
                 this.showMessage(`Комната создана. ID: ${data.roomId}`);
                 document.getElementById('room-id-input').value = data.roomId;
+                document.getElementById('game-room-id').textContent = data.roomId;
+                document.getElementById('room-id-display').classList.remove('hidden');
                 break;
 
             case 'ROOM_JOINED':
@@ -759,7 +767,7 @@ const GameClient = {
     },
 
     // Показать определенный экран
-    sshowScreen: function(screenId) {
+    showScreen: function(screenId) {
         console.log('Показ экрана:', screenId);
         // Скрыть все экраны
         document.querySelectorAll('.screen').forEach(screen => {
