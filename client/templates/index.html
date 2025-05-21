@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра Слов</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="login-screen" class="screen">
+            <h1>Игра слов</h1>
+            <div class="form-group">
+                <label for="username-input">Ваше имя:</label>
+                <input type="text" id="username-input" placeholder="Введите имя">
+            </div>
+            <button id="login-btn" class="btn primary-btn">Войти</button>
+        </div>
+
+        <div id="lobby-screen" class="screen hidden">
+            <h1>Лобби</h1>
+            <div class="form-group">
+                <button id="create-room-btn" class="btn primary-btn">Создать комнату</button>
+            </div>
+            <div class="form-group">
+                <label for="room-id-input">ID комнаты:</label>
+                <input type="text" id="room-id-input" placeholder="Введите ID комнаты">
+                <button id="join-room-btn" class="btn secondary-btn">Присоединиться</button>
+            </div>
+            <div class="form-group">
+                <button id="practice-mode-btn" class="btn special-btn">Режим практики (одиночная игра)</button>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <div class="main-word-container">
+                    <h2>Основное слово: <span id="main-word"></span></h2>
+                </div>
+                <div class="game-info">
+                    <div class="info-item">
+                        <span class="label">Время:</span>
+                        <span id="time-left" class="value">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Очки:</span>
+                        <span id="score" class="value">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <div class="word-input-container">
+                    <input type="text" id="word-input" placeholder="Введите слово">
+                    <button id="submit-word-btn" class="btn primary-btn">Отправить</button>
+                </div>
+                <div class="words-container">
+                    <h3>Ваши слова:</h3>
+                    <div id="words-list" class="words-list"></div>
+                </div>
+                <div class="opponents-container">
+                    <h3>Соперники:</h3>
+                    <div id="opponents" class="opponents-list"></div>
+                </div>
+            </div>
+            <div id="message" class="message"></div>
+        </div>
+
+        <div id="results-container" class="screen hidden">
+            <h2>Результаты игры</h2>
+            <div id="results-list" class="results-list"></div>
+            <button id="back-to-lobby-btn" class="btn primary-btn">Вернуться в лобби</button>
+        </div>
+    </div>
+
+    <script src="/static/js/game_client.js"></script>
+</body>
+</html>

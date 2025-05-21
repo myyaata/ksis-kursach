@@ -1,0 +1,308 @@
+/* Общие стили */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.screen {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 50px;
+}
+
+h1, h2, h3 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.primary-btn {
+    background-color: #3498db;
+    color: white;
+}
+
+.primary-btn:hover {
+    background-color: #2980b9;
+}
+
+.secondary-btn {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.secondary-btn:hover {
+    background-color: #7f8c8d;
+}
+
+/* Стили экрана входа */
+#login-screen {
+    max-width: 400px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+/* Стили лобби */
+#lobby-screen {
+    max-width: 500px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+/* Стили игрового экрана */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.main-word-container {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.game-info {
+    display: flex;
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.info-item .label {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.info-item .value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.game-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.word-input-container {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.words-container {
+    flex: 1;
+    min-width: 300px;
+}
+
+.opponents-container {
+    flex: 1;
+    min-width: 300px;
+}
+
+.words-list {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 15px;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.opponents-list {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 15px;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.word-item {
+    background-color: #fff;
+    border-radius: 3px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+}
+
+.opponent {
+    background-color: #fff;
+    border-radius: 3px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.message {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(44, 62, 80, 0.9);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Стили экрана результатов */
+#results-container {
+    max-width: 700px;
+    margin: 100px auto;
+}
+
+.results-list {
+    margin-bottom: 30px;
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.position {
+    width: 40px;
+    height: 40px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    margin-right: 15px;
+}
+
+.player-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.player-score {
+    font-weight: bold;
+    font-size: 20px;
+    color: #2c3e50;
+    margin-right: 20px;
+}
+
+.words-count {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+#back-to-lobby-btn {
+    display: block;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#join-room-btn {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.special-btn {
+    background-color: #27ae60;
+    color: white;
+    width: 100%;
+}
+
+.special-btn:hover {
+    background-color: #219653;
+}
+
+/* Измененные стили для улучшения расположения элементов в лобби */
+#lobby-screen .form-group {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#create-room-btn, #practice-mode-btn, #join-room-btn {
+    width: 100%;
+    margin-top: 5px;
+}
+
+/* Чтобы убедиться, что input и кнопка присоединения выровнены правильно */
+#lobby-screen .form-group input {
+    margin-bottom: 10px;
+    width: 100%;
+}
