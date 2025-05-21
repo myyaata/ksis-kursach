@@ -278,9 +278,47 @@ const GameClient = {
         document.querySelectorAll('.stars-container .star').forEach(star => {
             star.classList.remove('earned');
         });
-        //ПРОДОЛЖИТЬ
+        // Запускаем таймер
+        this.startTimer();
+        this.renderGameState();
+        },
+
+        // Добавляем новый метод для проверки звезд при добавлении слова
+    checkLevelStars: function() {
+        if (!this.state.levelsMode || !this.state.currentLevelData) return;
+
+        const targets = this.state.currentLevelData.targets;
+        const wordsCount = this.state.userWords.length;
+        let earnedStars = 0;
+
+        if (wordsCount >= targets[2]) {
+            earnedStars = 3;
+        } else if (wordsCount >= targets[1]) {
+            earnedStars = 2;
+        } else if (wordsCount >= targets[0]) {
+            earnedStars = 1;
         }
 
+        // Обновляем звезды, если количество изменилось
+        if (earnedStars > this.state.earnedStars) {
+            this.state.earnedStars = earnedStars;
+            this.updateStarsDisplay();
+        }
+    },
+
+    // Обновление отображения звезд
+    updateStarsDisplay: function() {
+        for (let i = 1; i <= 3; i++) {
+            const star = document.getElementById(`star-${i}`);
+            if (star) {
+                if (i <= this.state.earnedStars) {
+                    star.classList.add('earned');
+                } else {
+                    star.classList.remove('earned');
+                }
+            }
+        }
+    },
 
     // Получение ID игрока с сервера
     getPlayerId: function() {
@@ -497,7 +535,7 @@ const GameClient = {
         }
     },
 
-    // Обработка слова в режиме практики
+    // Модифицируем метод processPracticeWord для работы с уровнями
     processPracticeWord: function(word) {
         console.log('Обработка слова в режиме практики:', word);
 
@@ -520,6 +558,11 @@ const GameClient = {
 
             this.showMessage(`+${score} очков за слово "${word}"!`);
             this.renderGameState();
+
+            // Проверяем звезды для режима уровней
+            if (this.state.levelsMode) {
+                this.checkLevelStars();
+            }
         } else {
             this.showMessage(`Слово "${word}" не может быть составлено из букв основного слова или отсутствует в словаре`);
         }
@@ -577,11 +620,34 @@ const GameClient = {
             }];
         }
 
+        // Для режима уровней сохраняем прогресс
+        if (this.state.levelsMode && this.state.currentLevelData) {
+            const levelId = this.state.currentLevelData.id;
+            const currentStars = this.state.earnedStars;
+
+            // Получаем текущий прогресс по уровню
+            const levelProgress = this.state.progress.levels[levelId] || { stars: 0 };
+
+            // Обновляем только если получили больше звезд
+            if (currentStars > levelProgress.stars) {
+                levelProgress.stars = currentStars;
+                this.state.progress.levels[levelId] = levelProgress;
+
+                // Разблокируем следующий уровень, если это текущий уровень
+                if (levelId === this.state.progress.currentLevel) {
+                    this.state.progress.currentLevel = Math.min(levelId + 1, this.levels.length);
+                }
+
+                this.saveProgress();
+            }
+        }
+
         this.showResults(results);
         this.showScreen('results-container');
 
-        // Сбрасываем режим практики
+        // Сбрасываем режимы
         this.state.practiceMode = false;
+        this.state.levelsMode = false;
     },
 
     // Запуск таймера обратного отсчета
@@ -693,7 +759,7 @@ const GameClient = {
     },
 
     // Показать определенный экран
-    showScreen: function(screenId) {
+    sshowScreen: function(screenId) {
         console.log('Показ экрана:', screenId);
         // Скрыть все экраны
         document.querySelectorAll('.screen').forEach(screen => {
@@ -701,8 +767,13 @@ const GameClient = {
         });
 
         // Показать нужный экран
-        document.getElementById(screenId).classList.remove('hidden');
-    }
+        const screen = document.getElementById(screenId);
+        if (screen) {
+            screen.classList.remove('hidden');
+        } else {
+            console.error('Экран не найден:', screenId);
+        }
+    },
 };
 
 // Инициализация игры при загрузке страницы
