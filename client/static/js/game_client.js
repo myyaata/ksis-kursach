@@ -13,16 +13,55 @@ const GameClient = {
         playerId: "",          // ID игрока
         roomId: "",            // ID комнаты для мультиплеера
         opponents: [],         // Данные о других игроках в комнате
-        practiceMode: false    // Режим практики (одиночная игра)
-    },
+        practiceMode: false,   // Режим практики (одиночная игра)
+        levelsMode: false,     // Режим уровней
+        currentLevelData: null, // Данные текущего уровня
+        earnedStars: 0,        // Заработанные звезды за текущий уровень
+        progress: {            // Прогресс игрока по уровням
+            currentLevel: 1,
+            levels: {}         // Информация о пройденных уровнях и звездах
+        }
+},
 
     // WebSocket соединение
     socket: null,
     timer: null,
 
+    levels: [
+        {
+            id: 1,
+            mainWord: "программа",
+            wordsToFind: ["мама", "папа", "рама", "гора", "пора", "порог", "грамм"],
+            targets: [3, 5, 7],  // Количество слов для 1, 2, 3 звезд
+            timeLimit: 180,
+            hint: "Начните с простых слов из 3-4 букв. Например, 'рама'.",
+            background: "/static/img/levels/level1.jpg"
+        },
+        {
+            id: 2,
+            mainWord: "компьютер",
+            wordsToFind: ["кот", "ток", "метр", "комп", "тюрьма", "тюрем", "корт", "порт", "трюмо"],
+            targets: [4, 7, 9],
+            timeLimit: 240,
+            hint: "Обратите внимание на букву 'ю'. Её сложно использовать, но она есть в некоторых словах.",
+            background: "/static/img/levels/level2.jpg"
+        },
+        {
+            id: 3,
+            mainWord: "технология",
+            wordsToFind: ["нота", "тело", "тень", "лето", "толь", "хлен", "нехотя", "хотя", "гол", "лето", "техно"],
+            targets: [5, 8, 11],
+            timeLimit: 300,
+            hint: "Попробуйте составить слова, начинающиеся с 'т' и 'х'.",
+            background: "/static/img/levels/level3.jpg"
+        },
+        // Добавьте больше уровней по аналогии
+    ],
+
     // Инициализация игры
     init: function() {
         console.log('Инициализация GameClient...');
+        this.loadProgress();
 
         // Получение ID игрока
         this.getPlayerId().then(playerId => {
@@ -55,10 +94,16 @@ const GameClient = {
                 }
             });
 
-            // Добавляем обработчик для режима практики
+            // Обработчик для быстрой игры (режим практики)
             document.getElementById('practice-mode-btn').addEventListener('click', () => {
-                console.log('Нажата кнопка режима практики');
+                console.log('Нажата кнопка быстрой игры');
                 this.startPracticeMode();
+            });
+
+            // Обработчик для режима уровней
+            document.getElementById('levels-mode-btn').addEventListener('click', () => {
+                console.log('Нажата кнопка режима уровней');
+                this.showLevelsScreen();
             });
 
             document.getElementById('submit-word-btn').addEventListener('click', () => {
@@ -87,11 +132,155 @@ const GameClient = {
                 console.log('Возврат в лобби');
                 this.showScreen('lobby-screen');
             });
+
+            document.getElementById('back-to-lobby-from-levels').addEventListener('click', () => {
+                console.log('Возврат в лобби из экрана уровней');
+                this.showScreen('lobby-screen');
+            });
+
+            // Обработчик для копирования ID комнаты
+            document.getElementById('copy-room-id').addEventListener('click', () => {
+                const roomId = document.getElementById('game-room-id').textContent;
+                this.copyToClipboard(roomId);
+                this.showMessage('ID комнаты скопирован в буфер обмена');
+            });
+
+            // Создаем папки для изображений, если их нет
+            this.createImageFolders();
         }).catch(error => {
             console.error('Ошибка при получении ID игрока:', error);
             this.showError('Ошибка подключения к серверу: ' + error.message);
         });
     },
+
+    // Создание папок для изображений
+    createImageFolders: function() {
+        // Это просто заглушка, на клиенте мы не можем создавать папки
+        // В реальном проекте нужно создать эти папки вручную на сервере
+        console.log('Примечание: Убедитесь, что следующие папки существуют на сервере:');
+        console.log('/static/img/');
+        console.log('/static/img/levels/');
+        console.log('/static/img/star.svg должен быть добавлен');
+    },
+
+    // Копирование текста в буфер обмена
+    copyToClipboard: function(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            console.log('Текст скопирован в буфер обмена');
+        }).catch(err => {
+            console.error('Ошибка при копировании текста:', err);
+        });
+    },
+
+    // Загрузка прогресса игрока
+    loadProgress: function() {
+        const savedProgress = localStorage.getItem('wordGameProgress');
+        if (savedProgress) {
+            try {
+                this.state.progress = JSON.parse(savedProgress);
+                console.log('Загружен прогресс игрока:', this.state.progress);
+            } catch (e) {
+                console.error('Ошибка при загрузке прогресса:', e);
+                this.state.progress = { currentLevel: 1, levels: {} };
+            }
+        }
+    },
+
+    // Сохранение прогресса игрока
+    saveProgress: function() {
+        localStorage.setItem('wordGameProgress', JSON.stringify(this.state.progress));
+        console.log('Прогресс игрока сохранен:', this.state.progress);
+    },
+
+    // Показ экрана выбора уровней
+    showLevelsScreen: function() {
+        // Формируем сетку уровней
+        const levelsGrid = document.getElementById('levels-grid');
+        levelsGrid.innerHTML = '';
+
+        this.levels.forEach(level => {
+            const isUnlocked = level.id <= this.state.progress.currentLevel;
+            const levelProgress = this.state.progress.levels[level.id] || { stars: 0 };
+
+            const levelCard = document.createElement('div');
+            levelCard.className = `level-card ${isUnlocked ? '' : 'locked'}`;
+
+            if (isUnlocked) {
+                levelCard.addEventListener('click', () => {
+                    this.startLevelMode(level.id);
+                });
+            }
+
+            let levelCardContent = '';
+
+            if (isUnlocked) {
+                levelCardContent = `
+                    <div class="level-number">${level.id}</div>
+                    <div class="level-stars">
+                `;
+
+                // Добавляем звезды
+                for (let i = 1; i <= 3; i++) {
+                    const starClass = i <= levelProgress.stars ? 'earned' : '';
+                    levelCardContent += `<img src="/static/img/star.svg" class="level-star ${starClass}" alt="Звезда">`;
+                }
+
+                levelCardContent += `</div>`;
+            } else {
+                levelCardContent = `
+                    <div class="level-lock">🔒</div>
+                    <div class="level-number">${level.id}</div>
+                `;
+            }
+
+            levelCard.innerHTML = levelCardContent;
+            levelsGrid.appendChild(levelCard);
+        });
+
+        this.showScreen('levels-screen');
+    },
+
+    // Запуск режима уровней
+    startLevelMode: function(levelId) {
+        console.log('Запуск уровня:', levelId);
+
+        // Находим данные уровня
+        const levelData = this.levels.find(level => level.id === levelId);
+        if (!levelData) {
+            this.showError('Уровень не найден');
+            return;
+        }
+
+        this.state.levelsMode = true;
+        this.state.practiceMode = false;
+        this.state.currentLevelData = levelData;
+
+        // Настраиваем игру
+        this.state.mainWord = levelData.mainWord;
+        this.state.availableCells = 20;
+        this.state.timeLeft = levelData.timeLimit;
+        this.state.userWords = [];
+        this.state.score = 0;
+        this.state.opponents = [];
+        this.state.level = levelId;
+        this.state.earnedStars = 0;
+
+        // Показываем игровой экран
+        this.showScreen('game-screen');
+
+        // Отображаем информацию об уровне
+        document.getElementById('level-info').classList.remove('hidden');
+        document.getElementById('current-level').textContent = levelId;
+        document.getElementById('target-words-count').textContent = levelData.targets[0];
+        document.getElementById('room-id-display').classList.add('hidden');
+
+        // Сбрасываем звезды
+        document.querySelectorAll('.stars-container .star').forEach(star => {
+            star.classList.remove('earned');
+        });
+        //ПРОДОЛЖИТЬ
+        }
+
 
     // Получение ID игрока с сервера
     getPlayerId: function() {

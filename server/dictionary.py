@@ -47,6 +47,10 @@ class Dictionary:
         else:
             return [word for word in self.words if min_length <= len(word) <= max_length]
 
+    def generate_word(self, min_length=3, max_length=None):
+        """Алиас для get_random_word для обратной совместимости."""
+        return self.get_random_word(min_length, max_length)
+
     def get_random_word(self, min_length=3, max_length=None):
         import random
         suitable_words = self.filter_words_by_length(min_length, max_length)
