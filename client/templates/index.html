@@ -28,11 +28,22 @@
                 <button id="join-room-btn" class="btn secondary-btn">Присоединиться</button>
             </div>
             <div class="form-group">
-                <button id="practice-mode-btn" class="btn special-btn">Режим практики (одиночная игра)</button>
+                <button id="practice-mode-btn" class="btn special-btn">Быстрая игра (практика)</button>
+                <button id="levels-mode-btn" class="btn special-btn" style="margin-top: 10px;">Режим уровней</button>
             </div>
         </div>
 
         <div id="game-screen" class="screen hidden">
+            <div id="room-id-display" class="room-id-container hidden">
+                <span class="room-id-label">ID комнаты:</span>
+                <span id="game-room-id" class="room-id-value"></span>
+                <button id="copy-room-id" class="copy-btn" title="Копировать ID комнаты">
+                    <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
             <div class="game-header">
                 <div class="main-word-container">
                     <h2>Основное слово: <span id="main-word"></span></h2>
@@ -46,6 +57,28 @@
                         <span class="label">Очки:</span>
                         <span id="score" class="value">0</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Контейнер для одиночной игры с уровнями -->
+            <div id="level-info" class="level-container hidden">
+                <div class="level-indicator">Уровень <span id="current-level">1</span></div>
+                <div class="stars-container">
+                    <img src="/static/img/star.svg" class="star" id="star-1" alt="Звезда 1">
+                    <img src="/static/img/star.svg" class="star" id="star-2" alt="Звезда 2">
+                    <img src="/static/img/star.svg" class="star" id="star-3" alt="Звезда 3">
+                </div>
+                <div class="level-target">
+                    <div class="target-label">Цель уровня:</div>
+                    <div class="target-value">Составить <span id="target-words-count">5</span> слов</div>
+                </div>
+                <div class="hints-container">
+                    <div id="hint-popup" class="hint-popup">
+                        Составьте слова из букв основного слова!
+                    </div>
+                </div>
+                <div id="word-cells" class="word-cells">
+                    <!-- Ячейки для слов будут добавлены динамически -->
                 </div>
             </div>
 
@@ -64,6 +97,15 @@
                 </div>
             </div>
             <div id="message" class="message"></div>
+            <div id="level-background" class="level-background"></div>
+        </div>
+
+        <div id="levels-screen" class="screen hidden">
+            <h2>Выберите уровень</h2>
+            <div class="levels-grid" id="levels-grid">
+                <!-- Уровни будут добавлены динамически -->
+            </div>
+            <button id="back-to-lobby-from-levels" class="btn primary-btn">Вернуться в лобби</button>
         </div>
 
         <div id="results-container" class="screen hidden">

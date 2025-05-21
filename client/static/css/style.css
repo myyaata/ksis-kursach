@@ -112,6 +112,52 @@ input[type="text"]:focus {
     border-bottom: 1px solid #eee;
 }
 
+.room-id-container {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    width: fit-content;
+}
+
+.room-id-label {
+    margin-right: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.room-id-value {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #3498db;
+}
+
+.copy-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+    background-color: #2980b9;
+}
+
+.copy-icon {
+    width: 16px;
+    height: 16px;
+}
+
 .main-word-container {
     font-size: 24px;
     font-weight: bold;
@@ -209,6 +255,212 @@ input[type="text"]:focus {
     font-weight: 500;
     opacity: 0;
     transition: opacity 0.3s;
+}
+
+.star-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    animation: star-fly 1.5s ease-out forwards;
+}
+
+@keyframes star-fly {
+    0% {
+        transform: scale(0.5) translate(0, 0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5) translate(var(--tx), var(--ty));
+        opacity: 0;
+    }
+}
+
+/* Стили для одиночной игры с уровнями */
+.level-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.level-indicator {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.stars-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.star {
+    width: 30px;
+    height: 30px;
+    filter: grayscale(100%);
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.star.earned {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.level-target {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.target-label {
+    font-size: 16px;
+    color: #7f8c8d;
+    margin-bottom: 5px;
+}
+
+.target-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.hints-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.hint-popup {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(44, 62, 80, 0.9);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    max-width: 80%;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.5s, transform 0.5s;
+    pointer-events: none;
+}
+
+.hint-popup.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.word-cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.word-cell {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #95a5a6;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    transition: all 0.3s;
+}
+
+.word-cell.filled {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+}
+
+.level-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.1;
+}
+
+/* Стили для выбора уровня */
+.levels-screen {
+    max-width: 800px;
+    margin: 50px auto;
+}
+
+.levels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.level-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.level-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.level-number {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.level-stars {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.level-star {
+    width: 20px;
+    height: 20px;
+}
+
+.level-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.level-lock {
+    font-size: 30px;
+    margin-bottom: 10px;
+    color: #7f8c8d;
 }
 
 /* Стили экрана результатов */
