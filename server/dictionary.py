@@ -8,9 +8,16 @@ class Dictionary:
         if dictionary_file:
             self.load_from_file(dictionary_file)
         else:
-            default_path = os.path.join(os.path.dirname(__file__), 'resources', 'russian_words.txt')
-            if os.path.exists(default_path):
-                self.load_from_file(default_path)
+            # Сначала пробуем загрузить расширенный словарь
+            extended_path = os.path.join(os.path.dirname(__file__), 'resources', 'extended_russian_words.txt')
+            if os.path.exists(extended_path):
+                print("Загружаем расширенный словарь...")
+                self.load_from_file(extended_path)
+            else:
+                # Если расширенного нет, загружаем базовый
+                default_path = os.path.join(os.path.dirname(__file__), 'resources', 'russian_words.txt')
+                if os.path.exists(default_path):
+                    self.load_from_file(default_path)
 
     def load_from_file(self, file_path):
         try:

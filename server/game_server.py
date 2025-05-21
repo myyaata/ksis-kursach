@@ -300,7 +300,4 @@ class GameServer:
             await asyncio.sleep(1)  # Проверка каждую секунду
 
     def generate_word(self, length: int) -> str:
-        suitable_words = self.dictionary.filter_words_by_length(min_length=length)
-        if not suitable_words:
-            return "программирование"
-        return random.choice(suitable_words)
+        return self.dictionary.generate_word(min_length=length, max_length=length+4)
