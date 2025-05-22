@@ -63,6 +63,48 @@ class Dictionary:
     def size(self):
         return len(self.words)
 
+    def check_word(self, word: str, main_word: str = None) -> bool:
+        """
+        Проверяет валидность слова.
+        Если main_word задано, проверяет также возможность составить слово из букв основного слова.
+
+        Args:
+            word (str): Слово для проверки
+            main_word (str, optional): Основное слово, из букв которого должно составляться слово
+
+        Returns:
+            bool: True если слово валидно и может быть составлено из основного слова (если указано)
+        """
+        word = word.lower().strip()
+
+        # Проверяем минимальную длину
+        if len(word) < 3:
+            return False
+
+        # Проверяем наличие в словаре
+        if word not in self.words:
+            return False
+
+        # Если указано основное слово, проверяем возможность составления
+        if main_word:
+            main_word = main_word.lower()
+            main_word_chars = list(main_word)
+
+            for char in word:
+                if char in main_word_chars:
+                    main_word_chars.remove(char)
+                else:
+                    return False
+
+        return True
+
+    def can_make_word(self, word: str, main_word: str) -> bool:
+        """
+        Проверяет, можно ли составить слово из букв основного слова.
+        (Алиас для check_word с указанием main_word)
+        """
+        return self.check_word(word, main_word)
+
 
 # Создание примера файла со словарем для тестирования
 def create_sample_dictionary():
@@ -93,3 +135,19 @@ if __name__ == "__main__":
     print(f"Слово 'программист' в словаре: {dictionary.contains('программист')}")
     print(f"Случайное слово: {dictionary.get_random_word()}")
     print(f"Случайное длинное слово: {dictionary.get_random_word(min_length=8)}")
+
+    # Тестирование новой функциональности
+    test_main_word = "программирование"
+    test_words = [
+        ("программа", True),
+        ("грамм", True),
+        ("мир", True),
+        ("игра", False),  # нет буквы 'и' второй раз
+        ("код", False),  # нет буквы 'к'
+        ("мор", False)  # нет буквы 'м' второй раз
+    ]
+
+    print("\nТестирование проверки слов:")
+    for word, expected in test_words:
+        result = dictionary.check_word(word, test_main_word)
+        print(f"Слово '{word}': ожидается {expected}, получено {result} - {'OK' if result == expected else 'ERROR'}")

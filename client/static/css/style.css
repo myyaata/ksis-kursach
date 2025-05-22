@@ -10,12 +10,18 @@ body {
     background-color: #f5f5f5;
     color: #333;
     line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
 }
 
 .container {
-    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .hidden {
@@ -28,6 +34,62 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 30px;
     margin-top: 50px;
+    width: 100%;
+    flex-grow: 1;
+}
+
+
+
+
+/* Стили для ячеек слов */
+.word-cells {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.cell-group-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.cell-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.word-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border: 2px solid #3498db;
+    border-radius: 5px;
+    min-height: 40px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.word-cell.found {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+    font-weight: bold;
+}
+
+
+
+.letter-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-bottom: 2px solid #3498db;
+    margin: 0 2px;
 }
 
 h1, h2, h3 {
@@ -87,6 +149,10 @@ input[type="text"]:focus {
 .secondary-btn:hover {
     background-color: #7f8c8d;
 }
+
+
+
+
 
 /* Стили экрана входа */
 #login-screen {
@@ -303,11 +369,13 @@ input[type="text"]:focus {
     margin-bottom: 10px;
 }
 
+
+/* Стили для звезд */
 .stars-container {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 15px;
+    margin: 10px 0;
 }
 
 .star {
@@ -471,6 +539,11 @@ input[type="text"]:focus {
     color: #7f8c8d;
 }
 
+
+
+
+
+
 /* Стили экрана результатов */
 #results-container {
     max-width: 700px;
@@ -549,6 +622,9 @@ input[type="text"]:focus {
     background-color: #219653;
 }
 
+
+
+
 /* Измененные стили для улучшения расположения элементов в лобби */
 #lobby-screen .form-group {
     width: 80%;
@@ -561,8 +637,50 @@ input[type="text"]:focus {
     margin-top: 5px;
 }
 
+
+
+
+
+
 /* Чтобы убедиться, что input и кнопка присоединения выровнены правильно */
 #lobby-screen .form-group input {
     margin-bottom: 10px;
     width: 100%;
+}
+
+@supports (-webkit-touch-callout: none) {
+    /* Safari specific styles */
+    .word-cell {
+        display: -webkit-box;
+        -webkit-box-align: center;
+        -webkit-box-pack: center;
+    }
+
+    .stars-container {
+        display: -webkit-box;
+        -webkit-box-pack: center;
+    }
+
+    .level-stars {
+        display: -webkit-box;
+    }
+
+    .cell-group {
+        display: -webkit-box;
+        -webkit-box-orient: horizontal;
+        -webkit-box-lines: multiple;
+    }
+
+    /* Для старых версий Safari */
+    .word-cells {
+        display: block;
+    }
+
+    .level-card {
+        -webkit-box-sizing: border-box;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-box-align: center;
+        -webkit-box-pack: center;
+    }
 }

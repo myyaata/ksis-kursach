@@ -43,3 +43,15 @@ async def websocket_endpoint(websocket: WebSocket, player_id: str):
 @app.get("/generate_player_id")
 async def generate_player_id():
     return {"player_id": str(uuid.uuid4())[:8]}
+
+
+@app.get("/check_word")
+async def check_word_endpoint(word: str):
+    """
+    API эндпоинт для проверки слова через словарь.
+    """
+    if not word or len(word) < 3:
+        return {"valid": False}
+
+    valid = await game_server.check_word(word)
+    return {"valid": valid}

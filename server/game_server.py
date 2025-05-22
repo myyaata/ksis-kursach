@@ -154,8 +154,21 @@ class GameServer:
                 break
         if not player:
             return
-        # проверка слова
-        is_valid = self.check_word(word, room['mainWord'])
+
+        # Базовая проверка слова
+        if not word or len(word) < 3:
+            await self.send_to_player(player_id, {
+                'type': 'WORD_RESULT',
+                'word': word,
+                'valid': False,
+                'score': 0,
+                'message': 'Слово должно быть не менее 3 букв'
+            })
+            return
+
+        # Проверка слова по словарю и возможности составить из основного слова
+        is_valid = await self.check_word(word) and self.can_make_word(word, room['mainWord'])
+
         if is_valid:
             # проверка, что слово еще не использовалось этим игроком
             if word in player['userWords']:
@@ -188,21 +201,16 @@ class GameServer:
                 'word': word,
                 'valid': False,
                 'score': 0,
-                'message': 'Неверное слово'
+                'message': 'Неверное слово или его нельзя составить из основного слова'
             })
 
-    def check_word(self, word: str, main_word: str) -> bool:
-        # проверка валидности слова
-        word = word.lower()
-        if word not in self.dictionary:
-            return False
-        main_word_chars = list(main_word.lower())
-        for char in word:
-            if char in main_word_chars:
-                main_word_chars.remove(char)
-            else:
-                return False
-        return True
+    async def check_word(self, word: str) -> bool:
+        """
+        Проверяет слово на валидность с помощью словаря.
+        Используется для проверки слов в режиме practice.
+        """
+        word = word.lower().strip()
+        return word in self.dictionary
 
     async def finish_game(self, room_id: str):
         if not room_id or room_id not in self.rooms:
@@ -301,3 +309,31 @@ class GameServer:
 
     def generate_word(self, length: int) -> str:
         return self.dictionary.generate_word(min_length=length, max_length=length+4)
+
+    def can_make_word(self, word: str, main_word: str) -> bool:
+        """
+        Проверяет, можно ли составить слово из букв основного слова.
+        """
+        word = word.lower()
+        main_word_chars = list(main_word.lower())
+        for char in word:
+            if char in main_word_chars:
+                main_word_chars.remove(char)
+            else:
+                return False
+        return True
+
+    # Обновите check_word, чтобы использовать новый метод
+    def check_word(self, word: str, main_word: str = None) -> bool:
+        """
+        Проверяет валидность слова.
+        Если main_word задано, проверяет также возможность составить слово из букв основного слова.
+        """
+        word = word.lower()
+        if word not in self.dictionary:
+            return False
+
+        if main_word:
+            return self.can_make_word(word, main_word)
+
+        return True
