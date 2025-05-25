@@ -1,3 +1,4 @@
+
 /**
  * Игровой клиент для игры слов
  */
@@ -21,6 +22,104 @@ const GameClient = {
             currentLevel: 1,
             levels: {}         // Информация о пройденных уровнях и звездах
         }
+         },
+
+    showMessage: function(message, type = 'info', duration = 3000) {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+
+            // Создаем элемент сообщения, если его нет
+            let messageContainer = document.getElementById('message-container');
+            if (!messageContainer) {
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'message-container';
+                messageContainer.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    max-width: 400px;
+                `;
+                document.body.appendChild(messageContainer);
+            }
+
+            // Создаем элемент сообщения
+            const messageElement = document.createElement('div');
+            messageElement.style.cssText = `
+                padding: 12px 16px;
+                margin-bottom: 8px;
+                border-radius: 6px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                animation: slideIn 0.3s ease-out;
+                font-size: 14px;
+                line-height: 1.4;
+                word-wrap: break-word;
+            `;
+
+            // Устанавливаем цвет в зависимости от типа
+            switch(type) {
+                case 'success':
+                    messageElement.style.backgroundColor = '#d4edda';
+                    messageElement.style.color = '#155724';
+                    messageElement.style.border = '1px solid #c3e6cb';
+                    break;
+                case 'error':
+                    messageElement.style.backgroundColor = '#f8d7da';
+                    messageElement.style.color = '#721c24';
+                    messageElement.style.border = '1px solid #f5c6cb';
+                    break;
+                case 'warning':
+                    messageElement.style.backgroundColor = '#fff3cd';
+                    messageElement.style.color = '#856404';
+                    messageElement.style.border = '1px solid #ffeaa7';
+                    break;
+                default: // info
+                    messageElement.style.backgroundColor = '#d1ecf1';
+                    messageElement.style.color = '#0c5460';
+                    messageElement.style.border = '1px solid #bee5eb';
+                    break;
+            }
+
+            messageElement.textContent = message;
+            messageContainer.appendChild(messageElement);
+
+            // Добавляем CSS анимацию, если её нет
+            if (!document.getElementById('message-animations')) {
+                const style = document.createElement('style');
+                style.id = 'message-animations';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideOut {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Автоматически удаляем сообщение
+            setTimeout(() => {
+                messageElement.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (messageElement.parentNode) {
+                        messageElement.parentNode.removeChild(messageElement);
+                    }
+                }, 300);
+            }, duration);
     },
 
     // WebSocket соединение
@@ -28,38 +127,147 @@ const GameClient = {
     timer: null,
 
     levels: [
-        {
-            id: 1,
-            mainWord: "программа",
-            wordsToFind: ["мама", "папа", "рама", "гора", "пора", "порог", "грамм"],
-            targets: [3, 5, 7],  // Количество слов для 1, 2, 3 звезд
-            timeLimit: 180,
-            hint: "Начните с простых слов из 3-4 букв. Например, 'рама'.",
-            background: "/static/img/levels/level1.jpg"
-        },
-        {
-            id: 2,
-            mainWord: "компьютер",
-            wordsToFind: ["кот", "ток", "метр", "комп", "тюрьма", "тюрем", "корт", "порт", "трюмо"],
-            targets: [4, 7, 9],
-            timeLimit: 240,
-            hint: "Обратите внимание на букву 'ю'. Её сложно использовать, но она есть в некоторых словах.",
-            background: "/static/img/levels/level2.jpg"
-        },
-        {
-            id: 3,
-            mainWord: "технология",
-            wordsToFind: ["нота", "тело", "тень", "лето", "толь", "хлен", "нехотя", "хотя", "гол", "лето", "техно"],
-            targets: [5, 8, 11],
-            timeLimit: 300,
-            hint: "Попробуйте составить слова, начинающиеся с 'т' и 'х'.",
-            background: "/static/img/levels/level3.jpg"
-        },
-        // Добавьте больше уровней по аналогии
-    ],
+    {
+        id: 1,
+        mainWord: "программа",
+        wordsToFind: ["ром", "грамм", "пора", "рама", "амор", "марма", "гамматю"],
+        targets: [3, 5, 7],
+        timeLimit: 180,
+        hint: "Ищите короткие слова из 3-4 букв, затем переходите к более длинным.",
+        background: "/static/img/levels/level1.jpg"
+    },
+    {
+        id: 2,
+        mainWord: "компьютер",
+        wordsToFind: ["кот", "метр", "порт", "трек", "комп", "ютро", "перо", "корт"],
+        targets: [4, 6, 8],
+        timeLimit: 240,
+        hint: "Буква 'ю' встречается редко — используйте её в конце слов.",
+        background: "/static/img/levels/level2.jpg"
+    },
+    {
+        id: 3,
+        mainWord: "технология",
+        wordsToFind: ["тело", "лого", "гол", "хет", "неон", "хол", "гиена", "техно", "лето"],
+        targets: [4, 6, 9],
+        timeLimit: 300,
+        hint: "Слова с 'х' и 'г' могут быть неочевидными.",
+        background: "/static/img/levels/level3.jpg"
+    },
+    {
+        id: 4,
+        mainWord: "автомобиль",
+        wordsToFind: ["мот", "лита", "бит", "авто", "моль", "том", "лимо", "бомба", "таль"],
+        targets: [4, 6, 9],
+        timeLimit: 240,
+        hint: "Обратите внимание на 'ь' — его можно использовать в конце слов.",
+        background: "/static/img/levels/level4.jpg"
+    },
+    {
+        id: 5,
+        mainWord: "республика",
+        wordsToFind: ["пес", "куб", "липа", "суп", "белка", "пир", "репа", "булка", "спур"],
+        targets: [4, 6, 9],
+        timeLimit: 270,
+        hint: "Попробуйте слова с 'у' и 'и'.",
+        background: "/static/img/levels/level5.jpg"
+    },
+    {
+        id: 6,
+        mainWord: "эксперимент",
+        wordsToFind: ["пир", "мен", "тип", "крем", "метр", "перт", "экран", "кит", "треп"],
+        targets: [4, 6, 9],
+        timeLimit: 300,
+        hint: "Буква 'э' встречается редко — используйте её в начале слов.",
+        background: "/static/img/levels/level6.jpg"
+    },
+    {
+        id: 7,
+        mainWord: "директор",
+        wordsToFind: ["код", "рок", "тир", "кит", "ред", "док", "кино", "ток", "диктор"],
+        targets: [4, 6, 9],
+        timeLimit: 240,
+        hint: "Попробуйте слова с 'д' и 'к'.",
+        background: "/static/img/levels/level7.jpg"
+    },
+    {
+        id: 8,
+        mainWord: "калькулятор",
+        wordsToFind: ["куль", "рак", "рот", "люк", "торт", "акр", "крот", "лак", "каюр"],
+        targets: [4, 6, 9],
+        timeLimit: 270,
+        hint: "Буква 'ь' может быть сложной — используйте её в середине слов.",
+        background: "/static/img/levels/level8.jpg"
+    },
+    {
+        id: 9,
+        mainWord: "телевизор",
+        wordsToFind: ["лев", "зло", "тело", "вино", "литр", "резит", "вето", "зило", "тезис"],
+        targets: [4, 6, 9],
+        timeLimit: 300,
+        hint: "Слова с 'з' и 'в' могут быть неочевидными.",
+        background: "/static/img/levels/level9.jpg"
+    },
+    {
+        id: 10,
+        mainWord: "фотография",
+        wordsToFind: ["торф", "граф", "рот", "фрау", "гора", "агора", "фора", "тиф", "арго"],
+        targets: [4, 6, 9],
+        timeLimit: 270,
+        hint: "Буква 'ф' встречается редко — используйте её в начале или конце.",
+        background: "/static/img/levels/level10.jpg"
+    },
+    {
+        id: 11,
+        mainWord: "лаборатория",
+        wordsToFind: ["лоб", "робот", "борт", "лира", "табор", "оратор", "брат", "литр", "бал"],
+        targets: [4, 6, 9],
+        timeLimit: 300,
+        hint: "Попробуйте длинные слова с 'р' и 'т'.",
+        background: "/static/img/levels/level11.jpg"
+    },
+    {
+        id: 12,
+        mainWord: "космонавт",
+        wordsToFind: ["сом", "нос", "ток", "ван", "кост", "сова", "мост", "наст", "команда"],
+        targets: [4, 6, 9],
+        timeLimit: 240,
+        hint: "Буква 'в' может быть ключевой в некоторых словах.",
+        background: "/static/img/levels/level12.jpg"
+    },
+    {
+        id: 13,
+        mainWord: "электричество",
+        wordsToFind: ["кит", "лев", "тире", "река", "литр", "ветер", "китель", "телец", "кельт"],
+        targets: [4, 6, 9],
+        timeLimit: 330,
+        hint: "Длинное слово — ищите комбинации из 3-5 букв.",
+        background: "/static/img/levels/level13.jpg"
+    },
+    {
+        id: 14,
+        mainWord: "стадион",
+        wordsToFind: ["сад", "нос", "тон", "доит", "аист", "дина", "стои", "данс", "оазис"],
+        targets: [4, 6, 9],
+        timeLimit: 240,
+        hint: "Попробуйте слова с 'д' и 'н'.",
+        background: "/static/img/levels/level14.jpg"
+    },
+    {
+        id: 15,
+        mainWord: "библиотека",
+        wordsToFind: ["бит", "либ", "кот", "бал", "лита", "акт", "билет", "тека", "блок"],
+        targets: [4, 6, 9],
+        timeLimit: 300,
+        hint: "Буква 'б' встречается дважды — используйте её в разных словах.",
+        background: "/static/img/levels/level15.jpg"
+    }
+],
+
     getLevelById(id) {
         return this.levels.find(level => level.id === id);
     },
+
 
     // Инициализация игры
     init: function() {
@@ -145,12 +353,29 @@ const GameClient = {
                 this.showScreen('lobby-screen');
             });
 
+            document.getElementById('back-to-lobby-from-waiting').addEventListener('click', () => {
+            console.log('Возврат в лобби из комнаты ожидания');
+            this.leaveRoom();
+            this.showScreen('lobby-screen');
+            });
+
+            document.getElementById('start-multiplayer-game').addEventListener('click', () => {
+            console.log('Запуск мультиплеерной игры');
+            this.startMultiplayerGame();
+            });
+
             // Обработчик для копирования ID комнаты
             document.getElementById('copy-room-id').addEventListener('click', () => {
                 const roomId = document.getElementById('game-room-id').textContent;
                 this.copyToClipboard(roomId);
                 this.showMessage('ID комнаты скопирован в буфер обмена');
             });
+
+            document.getElementById('copy-waiting-room-id').addEventListener('click', () => {
+            const roomId = document.getElementById('waiting-room-id').textContent;
+            this.copyToClipboard(roomId);
+            this.showMessage('ID комнаты скопирован в буфер обмена');
+        });
 
             // Создаем папки для изображений, если их нет
             this.createImageFolders();
@@ -201,13 +426,12 @@ const GameClient = {
 
     // Показ экрана выбора уровней
     showLevelsScreen: function() {
-        // Формируем сетку уровней
         console.log('Запуск showLevelsScreen...');
         console.log('Состояние прогресса:', this.state.progress);
         const levelsGrid = document.getElementById('levels-grid');
         if (!levelsGrid) {
-        console.error('Элемент levels-grid не найден!');
-        return;
+            console.error('Элемент levels-grid не найден!');
+            return;
         }
         levelsGrid.innerHTML = '';
 
@@ -306,13 +530,14 @@ const GameClient = {
         this.renderGameState();
     },
 
-    // Вспомогательные методы:
-
     updateLevelUI: function(levelData) {
         // Отображаем информацию об уровне
         document.getElementById('level-info').classList.remove('hidden');
         document.getElementById('current-level').textContent = levelData.id;
-        document.getElementById('target-words-count').textContent = levelData.targets[0];
+
+        // ИСПРАВЛЕНО: показываем общее количество слов для поиска
+        document.getElementById('target-words-count').textContent = levelData.wordsToFind.length;
+
         document.getElementById('room-id-display').classList.add('hidden');
 
         // Скрываем контейнер соперников
@@ -384,10 +609,44 @@ const GameClient = {
 
             // Показываем сообщение о получении новой звезды
             if (earnedStars > 0) {
-                this.showMessage(`Вы заработали ${earnedStars} ${this.declOfNum(earnedStars, ['звезду', 'звезды', 'звезд'])}!`, 5000);
+                this.showMessage(`Вы заработали ${earnedStars} ${this.declOfNum(earnedStars, ['звезду', 'звезды', 'звезд'])}!`, 'success', 5000);
             }
         }
-},
+
+        // ИСПРАВЛЕНО: проверяем завершение уровня только если найдены ВСЕ целевые слова
+        if (foundTargetWords >= wordsToFind.length) {
+            setTimeout(() => {
+                this.completeLevel(earnedStars);
+            }, 2000);
+        }
+    },
+
+    // Завершение уровня
+    completeLevel: function(stars) {
+        console.log('Завершение уровня со звездами:', stars);
+        this.stopTimer();
+
+        // Сохраняем прогресс
+        const levelId = this.state.currentLevelData.id;
+        const currentProgress = this.state.progress.levels[levelId] || { stars: 0 };
+
+        if (stars > currentProgress.stars) {
+            this.state.progress.levels[levelId] = { stars: stars };
+
+            // Разблокируем следующий уровень
+            if (levelId === this.state.progress.currentLevel && levelId < this.levels.length) {
+                this.state.progress.currentLevel = levelId + 1;
+            }
+
+            this.saveProgress();
+        }
+
+        // ИСПРАВЛЕНО: показываем правильное сообщение и экран завершения
+        this.showMessage(`Поздравляем! Уровень ${levelId} пройден с ${stars} звездами!`, 'success', 5000);
+
+        // Показываем экран завершения уровня
+        this.showLevelCompletionScreen(true, stars);
+    },
 
     // Обновление отображения звезд
     updateStarsDisplay: function() {
@@ -471,6 +730,63 @@ const GameClient = {
         };
     },
 
+    // Универсальная функция проверки слов через API
+    checkWordWithAPI: async function(word, mainWord) {
+        console.log('Проверка слова через API:', word);
+
+        // Базовая валидация
+        if (!word || word.length < 2) {
+            return { valid: false, message: 'Слово должно содержать минимум 2 буквы' };
+        }
+
+        // Очищаем слово
+        word = word.trim().toLowerCase();
+        mainWord = mainWord.toLowerCase();
+
+        // Проверяем, что слово можно составить из букв основного слова
+        if (!this.canMakeWord(word, mainWord)) {
+            return { valid: false, message: 'Нельзя составить из букв основного слова' };
+        }
+
+        // Проверяем, не использовалось ли слово ранее
+        if (this.state.userWords.some(w => w.toLowerCase() === word)) {
+            return { valid: false, message: 'Вы уже использовали это слово' };
+        }
+
+        try {
+            // Проверяем слово через API
+            const response = await fetch(`/check_word?word=${encodeURIComponent(word)}`);
+
+            if (!response.ok) {
+                console.error('Ошибка HTTP:', response.status);
+                return { valid: false, message: 'Ошибка при проверке слова' };
+            }
+
+            const data = await response.json();
+            console.log('Ответ API:', data);
+
+            // Обрабатываем все возможные ответы от сервера
+            if (data.valid === true) {
+                return { valid: true, score: word.length };
+            } else if (data.valid === false) {
+                // Используем сообщение от сервера, если оно есть
+                return {
+                    valid: false,
+                    message: data.error || data.details || 'Слово не найдено в словаре'
+                };
+            } else {
+                // Если сервер вернул что-то неожиданное
+                console.error('Неожиданный ответ от сервера:', data);
+                return { valid: false, message: 'Ошибка при проверке слова' };
+            }
+
+        } catch (error) {
+            console.error('Ошибка при проверке слова:', error);
+            return { valid: false, message: 'Ошибка соединения с сервером' };
+        }
+    },
+
+
     // Режим практики (одиночная игра)
     startPracticeMode: function() {
         console.log('Запуск режима практики');
@@ -481,7 +797,8 @@ const GameClient = {
         // Генерируем случайное слово для практики
         const practiceWords = [
             "программирование", "разработка", "алгоритм", "компьютер",
-            "интернет", "технология", "виртуальный", "разработчик"
+            "интернет", "технология", "виртуальный", "разработчик",
+            "программист", "приложение", "операционная", "система"
         ];
         const mainWord = practiceWords[Math.floor(Math.random() * practiceWords.length)];
 
@@ -497,8 +814,15 @@ const GameClient = {
         this.showScreen('game-screen');
 
         // Скрываем контейнер соперников и информацию об уровне
-        document.querySelector('.opponents-container').classList.add('hidden');
-        document.getElementById('level-info').classList.add('hidden');
+        const opponentsContainer = document.querySelector('.opponents-container');
+        if (opponentsContainer) {
+            opponentsContainer.classList.add('hidden');
+        }
+
+        const levelInfo = document.getElementById('level-info');
+        if (levelInfo) {
+            levelInfo.classList.add('hidden');
+        }
 
         // Сбрасываем фон уровня
         const levelBackground = document.getElementById('level-background');
@@ -513,41 +837,72 @@ const GameClient = {
         this.showMessage("Режим практики запущен. Составьте как можно больше слов из букв слова: " + mainWord);
 },
 
-    // Словарь для проверки слов в режиме практики
-    practiceWordCheck: function(word, mainWord) {
-        console.log('Проверка слова:', word);
+    // функция для обработки слов в режиме практики
+    handleWordSubmit: function() {
+        const wordInput = document.getElementById('word-input');
+        if (!wordInput) return;
 
-        // Проверяем минимальную длину
-        if (word.length < 3) {
-            return false;
+        const word = wordInput.value.trim();
+        if (!word) return;
+
+        console.log('Отправка слова через Enter:', word);
+
+        if (this.state.practiceMode) {
+            this.processWordInPractice(word);
+        } else {
+            // Обычная игра через WebSocket
+            this.sendMessage({
+                type: 'SUBMIT_WORD',
+                word: word
+            });
         }
 
-        // Проверяем, что слово можно составить из букв основного слова
-        const mainWordChars = [...mainWord.toLowerCase()];
-        for (const char of word.toLowerCase()) {
-            const index = mainWordChars.indexOf(char);
-            if (index === -1) {
-                return false;
-            }
-            mainWordChars.splice(index, 1);
+        wordInput.value = '';
+    },
+
+    // функция для обработки слов в режиме практики
+    processWordInPractice: async function(word) {
+        console.log('Обработка слова:', word);
+
+        // Базовая проверка длины
+        if (word.length < 2) {
+            this.showMessage("Слово должно содержать минимум 2 буквы", 'error');
+            return;
         }
 
-        // Проверяем наличие слова в словаре
-        // Отправляем AJAX запрос на сервер для проверки слова в словаре
-        // Это будет синхронный запрос, чтобы сразу получить результат
-        let isValid = false;
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', `/check_word?word=${encodeURIComponent(word)}`, false); // синхронный запрос
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                isValid = response.valid;
-            }
-        };
-        xhr.send();
+        const trimmedWord = word.trim().toLowerCase();
 
-        return isValid;
-},
+        // Проверяем, не использовалось ли слово ранее
+        if (this.state.userWords.some(w => w.toLowerCase() === trimmedWord)) {
+            this.showMessage("Вы уже использовали это слово", 'error');
+            return;
+        }
+
+        // Показываем индикатор проверки
+        this.showMessage("Проверяем слово...", 'info');
+
+        try {
+            // Проверяем слово
+            const isValid = await this.practiceWordCheck(trimmedWord, this.state.mainWord);
+
+            if (isValid) {
+                // Только если слово валидно - добавляем его и начисляем очки
+                this.state.userWords.push(trimmedWord);
+                const score = trimmedWord.length;
+                this.state.score += score;
+
+                // Обновляем интерфейс
+                this.renderGameState();
+
+                this.showMessage(`+${score} очков за слово "${trimmedWord}"!`, 'success');
+            } else {
+                this.showMessage(`Слово "${trimmedWord}" не принято`, 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка при проверке слова:', error);
+            this.showMessage("Ошибка при проверке слова", 'error');
+        }
+    },
 
     renderWordCells: function() {
         // Если мы не в режиме уровней, не создаем ячейки
@@ -566,45 +921,53 @@ const GameClient = {
                 wordsByLength[len] = [];
             }
             wordsByLength[len].push(word);
-    });
-
-    // Создаем группы ячеек для каждой длины слова
-    Object.keys(wordsByLength).sort((a, b) => a - b).forEach(length => {
-        const words = wordsByLength[length];
-        const groupTitle = document.createElement('div');
-        groupTitle.className = 'cell-group-title';
-        groupTitle.textContent = `Слова из ${length} букв:`;
-        cellsContainer.appendChild(groupTitle);
-
-        const cellGroup = document.createElement('div');
-        cellGroup.className = 'cell-group';
-
-        words.forEach((word, index) => {
-            const cell = document.createElement('div');
-            cell.className = 'word-cell';
-            cell.dataset.word = word;
-            cell.dataset.length = length;
-
-            // Проверяем, найдено ли слово
-            const isFound = this.state.userWords.includes(word);
-            if (isFound) {
-                cell.classList.add('found');
-                cell.textContent = word;
-            } else {
-                // Создаем плейсхолдеры для букв
-                for (let i = 0; i < parseInt(length); i++) {
-                    const letterBox = document.createElement('span');
-                    letterBox.className = 'letter-box';
-                    cell.appendChild(letterBox);
-                }
-            }
-
-            cellGroup.appendChild(cell);
         });
 
-        cellsContainer.appendChild(cellGroup);
-    });
-},
+        // Создаем группы ячеек для каждой длины слова
+        Object.keys(wordsByLength).sort((a, b) => a - b).forEach(length => {
+            const words = wordsByLength[length];
+            const groupTitle = document.createElement('div');
+            groupTitle.className = 'cell-group-title';
+            groupTitle.textContent = `Слова из ${length} букв:`;
+            cellsContainer.appendChild(groupTitle);
+
+            const cellGroup = document.createElement('div');
+            cellGroup.className = 'cell-group';
+
+            words.forEach((word, index) => {
+                const wordContainer = document.createElement('div');
+                wordContainer.className = 'word-cell-container';
+                wordContainer.style.display = 'flex';
+                wordContainer.style.gap = '2px';
+                wordContainer.style.marginBottom = '5px';
+
+                // Проверяем, найдено ли слово
+                const isFound = this.state.userWords.includes(word);
+
+                // Создаем ячейки для каждой буквы
+                for (let i = 0; i < word.length; i++) {
+                    const letterCell = document.createElement('div');
+                    letterCell.className = 'word-cell';
+                    letterCell.style.width = '30px';
+                    letterCell.style.height = '30px';
+                    letterCell.style.minWidth = '30px';
+
+                    if (isFound) {
+                        letterCell.classList.add('found');
+                        letterCell.textContent = word[i].toUpperCase();
+                    } else {
+                        letterCell.textContent = '';
+                    }
+
+                    wordContainer.appendChild(letterCell);
+                }
+
+                cellGroup.appendChild(wordContainer);
+            });
+
+            cellsContainer.appendChild(cellGroup);
+        });
+    },
 
     // Обработка сообщений от сервера
     handleServerMessage: function(data) {
@@ -617,23 +980,57 @@ const GameClient = {
 
             case 'ROOM_CREATED':
                 this.state.roomId = data.roomId;
-                this.showMessage(`Комната создана. ID: ${data.roomId}`);
-                document.getElementById('room-id-input').value = data.roomId;
+                this.showMessage(`Комната создана. ID: ${data.roomId}`, 'success');
                 document.getElementById('game-room-id').textContent = data.roomId;
                 document.getElementById('room-id-display').classList.remove('hidden');
+                this.showWaitingRoom();
                 break;
 
             case 'ROOM_JOINED':
                 this.state.roomId = data.roomId;
-                this.showMessage(`Вы присоединились к комнате: ${data.roomId}`);
+                this.showMessage(`Вы в комнате ${data.roomId}`, 'success');
+                this.showWaitingRoom();
                 break;
 
-            case 'GAME_STATE':
-                this.updateGameState(data.state);
+            case 'WORD_FOUND':
+                console.log(`WORD_FOUND: ${data.username} нашел "${data.word}" (+${data.score})`);
+
+                // Показываем уведомление о слове соперника
+                this.showMessage(`${data.username}: ${data.word} (+${data.score})`, 'info', 2000);
                 break;
 
             case 'WORD_RESULT':
-                this.processWordResult(data.word, data.valid, data.score, data.message);
+                // Обработка результата проверки нашего слова
+                if (data.valid) {
+                    this.state.userWords.push(data.word);
+                    this.state.score += data.score;
+                    this.showMessage(`Слово "${data.word}" принято! +${data.score} очков`, 'success');
+                } else {
+                    this.showMessage(data.message || `Слово "${data.word}" не принято`, 'error');
+                }
+                break;
+
+            case 'GAME_STATE':
+                // ИСПРАВЛЕНИЕ: правильно обрабатываем состояние игры
+                console.log('Получено состояние игры:', data.state);
+
+                // Обновляем основную информацию
+                this.state.mainWord = data.state.mainWord;
+                this.state.availableCells = data.state.availableCells;
+                this.state.timeLeft = data.state.timeLeft;
+                this.state.score = data.state.score;
+                this.state.userWords = data.state.userWords || [];
+                this.state.roomId = data.state.roomId;
+
+                // ИСПРАВЛЕНИЕ: правильно обновляем информацию о сопериках
+                if (data.state.opponents) {
+                    this.state.opponents = data.state.opponents.map(opp => ({
+                        ...opp,
+                        foundWords: opp.foundWords || []
+                    }));
+                }
+
+                this.renderGameState();
                 break;
 
             case 'GAME_START':
@@ -647,8 +1044,26 @@ const GameClient = {
             case 'ERROR':
                 this.showError(data.message);
                 break;
+
+            default:
+                console.log('Неизвестный тип сообщения:', data.type);
         }
     },
+
+    showWaitingRoom: function() {
+        this.showScreen('waiting-room-screen');
+        document.getElementById('waiting-room-id').textContent = this.state.roomId;
+        this.updatePlayersList();
+},
+
+    updatePlayersList: function() {
+        const playersList = document.getElementById('waiting-players-list');
+        if (playersList) {
+            // Здесь должен быть список игроков из состояния сервера
+            // Пока показываем базовую информацию
+            playersList.innerHTML = `<div>Ожидание игроков... (${this.state.opponents.length + 1}/2)</div>`;
+        }
+},
 
     // Создание новой комнаты
     createRoom: function() {
@@ -675,25 +1090,79 @@ const GameClient = {
         }
     },
 
-    // Отправка составленного слова на проверку
-    submitWord: function(word) {
-        // Проверяем режим игры
-        if (this.state.levelsMode) {
-            this.processLevelWord(word);
-        } else if (this.state.practiceMode) {
-            this.processPracticeWord(word);
-        } else if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify({
-                type: 'SUBMIT_WORD',
-                word: word,
-                roomId: this.state.roomId
-            }));
-        } else {
-            this.showError('Нет соединения с сервером');
+    processPracticeWordWithAPI: async function(word) {
+        console.log('Обработка слова в режиме практики:', word);
+
+        // Показываем индикатор проверки
+        this.showMessage("Проверяем слово...", 'info', 1000);
+
+        try {
+            const result = await this.checkWordWithAPI(word, this.state.mainWord);
+
+            if (result.valid) {
+                // Добавляем слово в список
+                this.state.userWords.push(word);
+                this.state.score += result.score;
+
+                // Обновляем интерфейс
+                this.renderGameState();
+
+                this.showMessage(`Слово "${word}" принято! +${result.score} очков`, 'success');
+            } else {
+                this.showMessage(result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка при обработке слова:', error);
+            this.showMessage("Произошла ошибка при проверке слова", 'error');
         }
     },
 
-    // Модифицируем метод processPracticeWord для работы с уровнями
+    processMultiplayerWord: async function(word) {
+        console.log('Обработка слова в мультиплеерном режиме:', word);
+
+        // Показываем индикатор проверки
+        this.showMessage("Проверяем слово...", 'info', 1000);
+
+        try {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: 'SUBMIT_WORD',
+                    word: word
+                }));
+            } else {
+                this.showError('Нет соединения с сервером');
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке слова:', error);
+            this.showMessage("Произошла ошибка при отправке слова", 'error');
+        }
+},
+
+    submitWord: function(word) {
+        const trimmedWord = word.trim().toLowerCase();
+
+        if (!trimmedWord) {
+            this.showMessage("Введите слово", 'error');
+            return;
+        }
+
+        console.log('Отправка слова:', trimmedWord, 'Режим игры:', {
+            practice: this.state.practiceMode,
+            levels: this.state.levelsMode,
+            multiplayer: !this.state.practiceMode && !this.state.levelsMode
+        });
+
+        // Все режимы теперь используют одинаковую проверку через API
+        if (this.state.levelsMode) {
+            this.processLevelWord(trimmedWord);
+        } else if (this.state.practiceMode) {
+            this.processPracticeWordWithAPI(trimmedWord);
+        } else {
+            // Мультиплеерный режим теперь тоже использует API
+            this.processMultiplayerWord(trimmedWord);
+        }
+    },
+
     processPracticeWord: function(word) {
         console.log('Обработка слова:', word);
 
@@ -733,18 +1202,13 @@ const GameClient = {
         }
 },
 
-    // Обновление состояния игры
+
     updateGameState: function(newState) {
-        // Объединяем новое состояние с текущим
-        this.state = {
-            ...this.state,
-            ...newState
-        };
-        // После обновления состояния перерисовываем игру
+        console.log('Обновление состояния игры:', newState);
+        this.state = { ...this.state, ...newState };
         this.renderGameState();
     },
 
-    // Обработка результата проверки слова
     processWordResult: function(word, valid, score, message) {
         console.log('Обработка результата проверки слова:', word, valid, score, message);
         if (valid) {
@@ -752,6 +1216,27 @@ const GameClient = {
             this.showMessage(`+${score} очков за слово "${word}"!`);
         } else {
             this.showMessage(message || `Слово "${word}" не принято.`);
+        }
+    },
+
+    leaveRoom: function() {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify({
+                type: 'LEAVE_ROOM',
+                roomId: this.state.roomId
+            }));
+        }
+        this.state.roomId = "";
+        this.state.opponents = [];
+        document.getElementById('room-id-display').classList.add('hidden');
+    },
+
+    startMultiplayerGame: function() {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify({
+                type: 'START_GAME',
+                roomId: this.state.roomId
+            }));
         }
     },
 
@@ -813,125 +1298,140 @@ const GameClient = {
         this.state.levelsMode = false;
     },
 
-    processLevelWord: function(word) {
-    const self = this; // Сохраняем ссылку на this
+    processLevelWord: async function(word) {
+        console.log('Обработка слова в режиме уровней:', word);
 
-    // Проверяем слово
-    const validation = this.validateLevelWord(word);
+        // Показываем индикатор проверки
+        this.showMessage("Проверяем слово...", 'info', 1000);
 
-    if (!validation.valid) {
-        this.updateGameState({
-            lastWordResult: {
-                valid: false,
-                word: word,
-                message: validation.message
+        try {
+            const result = await this.checkWordWithAPI(word, this.state.mainWord);
+
+            if (result.valid) {
+                // Добавляем слово в список
+                this.state.userWords.push(word);
+                this.state.score += result.score;
+
+                // Проверяем, является ли это целевым словом
+                if (this.state.currentLevelData.wordsToFind.includes(word)) {
+                    this.showMessage(`Отлично! Найдено целевое слово "${word}"! +${result.score} очков`, 'success');
+                } else {
+                    this.showMessage(`Слово "${word}" принято! +${result.score} очков`, 'success');
+                }
+
+                // Обновляем интерфейс
+                this.renderGameState();
+                this.renderWordCells();
+                this.checkLevelStars();
+            } else {
+                this.showMessage(result.message, 'error');
             }
-        });
-        return;
-    }
-
-    // Добавляем слово в список найденных
-    const userWords = [...this.state.userWords, word.toLowerCase()];
-    const score = this.state.score + word.length;
-
-    // Проверяем достижение целей уровня
-    const starsEarned = this.calculateStarsEarned(userWords.length);
-    const levelCompleted = starsEarned > 0;
-
-    // Обновляем состояние
-    this.updateGameState({
-        userWords,
-        score,
-        earnedStars: starsEarned,
-        lastWordResult: {
-            valid: true,
-            word: word,
-            score: word.length
+        } catch (error) {
+            console.error('Ошибка при обработке слова:', error);
+            this.showMessage("Произошла ошибка при проверке слова", 'error');
         }
-    });
-
-    // Если уровень завершен
-    if (levelCompleted) {
-        this.finishLevel(true);
-    }
-},
-
-    validateLevelWord: function(word) {
-        const levelData = this.state.currentLevelData;
-
-        // Базовые проверки
-        if (!word || word.length < 3) {
-            return { valid: false, message: 'Слово должно быть не менее 3 букв' };
-        }
-
-        // Проверка, что слово можно составить из букв основного слова
-        if (!this.canMakeWord(word, this.state.mainWord)) {
-            return { valid: false, message: 'Нельзя составить из букв основного слова' };
-        }
-
-        // Проверка, что слово есть в списке wordsToFind
-        if (!levelData.wordsToFind.includes(word.toLowerCase())) {
-            return { valid: false, message: 'Это слово не требуется для уровня' };
-        }
-
-        // Проверка, что слово еще не использовалось
-        if (this.state.userWords.includes(word.toLowerCase())) {
-            return { valid: false, message: 'Вы уже использовали это слово' };
-        }
-
-        return { valid: true };
     },
 
     canMakeWord: function(word, mainWord) {
-        const mainWordChars = [...mainWord.toLowerCase()];
-        for (const char of word.toLowerCase()) {
-            const index = mainWordChars.indexOf(char);
-            if (index === -1) return false;
-            mainWordChars.splice(index, 1);
+    if (!word || !mainWord) {
+        return false;
+    }
+
+    // Приводим к нижнему регистру
+    word = word.toLowerCase().trim();
+    mainWord = mainWord.toLowerCase().trim();
+
+    // Создаем копию массива букв основного слова
+    const mainWordChars = [...mainWord];
+
+    // Проверяем каждую букву слова
+    for (const char of word) {
+        const index = mainWordChars.indexOf(char);
+        if (index === -1) {
+            return false; // Буква не найдена или уже использована
         }
-        return true;
-    },
+        mainWordChars.splice(index, 1); // Удаляем использованную букву
+    }
 
-    calculateStarsEarned: function(foundWordsCount) {
-        const targets = this.state.currentLevelData.targets;
-        if (foundWordsCount >= targets[2]) return 3;
-        if (foundWordsCount >= targets[1]) return 2;
-        if (foundWordsCount >= targets[0]) return 1;
-        return 0;
-    },
+    return true;
+},
 
-    finishLevel: function(success) {
-        this.stopTimer();
+    showLevelCompletionScreen: function(success, stars) {
+        console.log('Показ экрана завершения уровня');
 
-        this.setState({
-            gameFinished: true,
-            gameStarted: false,
-            levelCompleted: success
+        // ИСПРАВЛЕНО: создаем и показываем простое модальное окно
+        const existingModal = document.getElementById('level-completion-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'level-completion-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        `;
+
+        const starsHtml = Array.from({length: 3}, (_, i) =>
+            `<span style="font-size: 30px; color: ${i < stars ? '#ffd700' : '#ccc'};">⭐</span>`
+        ).join('');
+
+        content.innerHTML = `
+            <h2 style="color: #28a745; margin-bottom: 20px;">Уровень пройден!</h2>
+            <div style="margin: 20px 0;">${starsHtml}</div>
+            <p style="margin-bottom: 30px;">Вы заработали ${stars} ${this.declOfNum(stars, ['звезду', 'звезды', 'звезд'])}!</p>
+            <button id="continue-btn" style="
+                background: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-right: 10px;
+            ">Продолжить</button>
+            <button id="back-to-levels-btn" style="
+                background: #6c757d;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+            ">К выбору уровней</button>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Обработчики кнопок
+        document.getElementById('continue-btn').addEventListener('click', () => {
+            modal.remove();
+            this.showLevelsScreen();
         });
 
-        // Показываем экран завершения уровня
-        this.showLevelCompletionScreen(success);
-
-        // Сохраняем прогресс
-        this.saveLevelProgress(this.state.level, this.state.earnedStars);
-    },
-
-    showLevelCompletionScreen: function(success) {
-        const completionScreen = document.getElementById('level-completion-screen');
-        if (!completionScreen) return;
-
-        // Заполняем информацию о результате
-        document.getElementById('level-result-text').textContent =
-            success ? 'Уровень пройден!' : 'Время вышло!';
-
-        // Показываем заработанные звезды
-        const stars = this.state.earnedStars;
-        document.querySelectorAll('#level-stars .star').forEach((star, index) => {
-            star.classList.toggle('active', index < stars);
+        document.getElementById('back-to-levels-btn').addEventListener('click', () => {
+            modal.remove();
+            this.showLevelsScreen();
         });
-
-        // Показываем экран
-        completionScreen.classList.remove('hidden');
     },
 
     // Запуск таймера обратного отсчета
@@ -969,6 +1469,8 @@ const GameClient = {
 
     // Отрисовка игрового состояния в интерфейсе
     renderGameState: function() {
+        console.log('Рендеринг состояния. Соперники:', this.state.opponents);
+
         document.getElementById('main-word').textContent = this.state.mainWord;
         document.getElementById('score').textContent = this.state.score;
         this.renderTimeLeft();
@@ -983,17 +1485,32 @@ const GameClient = {
             wordsList.appendChild(wordElement);
         });
 
-        // Обновление информации о соперниках только если это не режим практики или уровней
         const opponentsList = document.getElementById('opponents');
-        if (!this.state.practiceMode && !this.state.levelsMode) {
+        if (!this.state.practiceMode && !this.state.levelsMode && this.state.opponents) {
             document.querySelector('.opponents-container').classList.remove('hidden');
             opponentsList.innerHTML = '';
+
             this.state.opponents.forEach(opponent => {
                 const opponentElement = document.createElement('div');
                 opponentElement.className = 'opponent';
-                opponentElement.textContent = `${opponent.username}: ${opponent.score} очков, ${opponent.wordsCount} слов`;
+                // ИСПРАВЛЕНИЕ: показываем актуальный счет и количество слов
+                const wordsCount = opponent.wordsCount || (opponent.foundWords ? opponent.foundWords.length : 0);
+                opponentElement.innerHTML = `
+                    <div class="opponent-name">${opponent.username}</div>
+                    <div class="opponent-stats">
+                        <span>${opponent.score} очков</span>
+                        <span>${wordsCount} слов</span>
+                    </div>
+                `;
+                console.log('Рендеринг соперника:', opponent.username, 'Счет:', opponent.score, 'Слов:', wordsCount);
                 opponentsList.appendChild(opponentElement);
             });
+        } else {
+            // Скрываем блок соперников в одиночных режимах
+            const opponentsContainer = document.querySelector('.opponents-container');
+            if (opponentsContainer) {
+                opponentsContainer.classList.add('hidden');
+            }
         }
 
         // Если это режим уровней, обновляем ячейки для слов
@@ -1012,22 +1529,139 @@ const GameClient = {
         document.getElementById('time-left').textContent = this.state.timeLeft;
     },
 
-    // Отображение сообщения пользователю
-    showMessage: function(message, duration = 3000) {
-        console.log('Сообщение:', message);
-        const messageElement = document.getElementById('message');
-        messageElement.textContent = message;
-        messageElement.style.opacity = 1;
+    // Исправленная функция для привязки обработчиков событий
+    bindEventListeners: function() {
+        // Обработчик для поля ввода слова
+        const wordInput = document.getElementById('word-input');
+        if (wordInput) {
+            // Удаляем старые обработчики, чтобы избежать дублирования
+            wordInput.removeEventListener('keypress', this.handleWordInputKeypress);
 
+            // Создаем новый обработчик с правильным контекстом
+            this.handleWordInputKeypress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleWordSubmit();
+                }
+            };
+            wordInput.addEventListener('keypress', this.handleWordInputKeypress);
+        }
+
+        // Обработчик для кнопки отправки слова
+        const submitBtn = document.querySelector('.submit-word-btn');
+        if (submitBtn) {
+            submitBtn.removeEventListener('click', this.handleWordSubmitClick);
+
+            this.handleWordSubmitClick = () => {
+                this.handleWordSubmit();
+            };
+
+            submitBtn.addEventListener('click', this.handleWordSubmitClick);
+        }
+    },
+
+    // Отображение сообщения пользователю
+    showMessage: function(message, type = 'info', duration = 3000) {
+        console.log(`[${type.toUpperCase()}] ${message}`);
+
+        // Создаем элемент сообщения, если его нет
+        let messageContainer = document.getElementById('message-container');
+        if (!messageContainer) {
+            messageContainer = document.createElement('div');
+            messageContainer.id = 'message-container';
+            messageContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                max-width: 400px;
+            `;
+            document.body.appendChild(messageContainer);
+        }
+
+        // Создаем элемент сообщения
+        const messageElement = document.createElement('div');
+        messageElement.style.cssText = `
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease-out;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        `;
+
+        // Устанавливаем цвет в зависимости от типа
+        switch(type) {
+            case 'success':
+                messageElement.style.backgroundColor = '#d4edda';
+                messageElement.style.color = '#155724';
+                messageElement.style.border = '1px solid #c3e6cb';
+                break;
+            case 'error':
+                messageElement.style.backgroundColor = '#f8d7da';
+                messageElement.style.color = '#721c24';
+                messageElement.style.border = '1px solid #f5c6cb';
+                break;
+            case 'warning':
+                messageElement.style.backgroundColor = '#fff3cd';
+                messageElement.style.color = '#856404';
+                messageElement.style.border = '1px solid #ffeaa7';
+                break;
+            default: // info
+                messageElement.style.backgroundColor = '#d1ecf1';
+                messageElement.style.color = '#0c5460';
+                messageElement.style.border = '1px solid #bee5eb';
+                break;
+        }
+
+        messageElement.textContent = message;
+        messageContainer.appendChild(messageElement);
+
+        // Добавляем CSS анимацию, если её нет
+        if (!document.getElementById('message-animations')) {
+            const style = document.createElement('style');
+            style.id = 'message-animations';
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Автоматически удаляем сообщение
         setTimeout(() => {
-            messageElement.style.opacity = 0;
+            messageElement.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                if (messageElement.parentNode) {
+                    messageElement.parentNode.removeChild(messageElement);
+                }
+            }, 300);
         }, duration);
     },
 
-    // Отображение ошибки
+    // Функция для отображения ошибок
     showError: function(message) {
-        console.error('Ошибка:', message);
-        alert(`Ошибка: ${message}`);
+        this.showMessage(message, 'error', 5000);
     },
 
     // Отображение результатов игры

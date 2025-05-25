@@ -70,7 +70,7 @@
                 </div>
                 <div class="level-target">
                     <div class="target-label">Цель уровня:</div>
-                    <div class="target-value">Составить <span id="target-words-count">5</span> слов</div>
+                    <div class="target-value">Найти <span id="target-words-count">5</span> слов из списка</div>
                 </div>
                 <div class="hints-container">
                     <div id="hint-popup" class="hint-popup">
@@ -113,7 +113,41 @@
             <div id="results-list" class="results-list"></div>
             <button id="back-to-lobby-btn" class="btn primary-btn">Вернуться в лобби</button>
         </div>
+
+
+    <div id="waiting-room-screen" class="screen hidden">
+        <h2>Ожидание игроков</h2>
+
+        <div class="room-info">
+            <p>ID комнаты: <span id="waiting-room-id"></span></p>
+            <button id="copy-waiting-room-id" class="btn btn-secondary">Копировать ID</button>
+        </div>
+
+        <div class="players-waiting">
+            <div id="waiting-players-list">
+                <!-- Список игроков будет добавлен динамически -->
+            </div>
+        </div>
+
+        <div class="waiting-actions">
+            <button id="start-multiplayer-game" class="btn btn-primary">Начать игру</button>
+            <button id="back-to-lobby-from-waiting" class="btn btn-secondary">Вернуться в лобби</button>
+        </div>
     </div>
+</div>
+
+    <div id="level-completion-screen" class="screen hidden">
+    <div class="completion-content">
+        <h2 id="level-result-text"></h2>
+        <div id="level-stars" class="stars-container">
+            <img src="/static/img/star.svg" class="star" alt="Звезда 1">
+            <img src="/static/img/star.svg" class="star" alt="Звезда 2">
+            <img src="/static/img/star.svg" class="star" alt="Звезда 3">
+        </div>
+        <button id="next-level-btn" class="btn primary-btn">Следующий уровень</button>
+        <button id="back-to-levels-btn" class="btn secondary-btn">Вернуться к уровням</button>
+    </div>
+</div>
 
     <script src="/static/js/game_client.js"></script>
 </body>
