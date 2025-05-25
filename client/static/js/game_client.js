@@ -130,11 +130,10 @@ const GameClient = {
     {
         id: 1,
         mainWord: "программа",
-        wordsToFind: ["ром", "грамм", "пора", "рама", "амор", "марма", "гамматю"],
+        wordsToFind: ["ром", "грамм", "пора", "рама", "амор", "марма", "гамма"],
         targets: [3, 5, 7],
         timeLimit: 180,
         hint: "Ищите короткие слова из 3-4 букв, затем переходите к более длинным.",
-        background: "/static/img/levels/level1.jpg"
     },
     {
         id: 2,
@@ -143,7 +142,6 @@ const GameClient = {
         targets: [4, 6, 8],
         timeLimit: 240,
         hint: "Буква 'ю' встречается редко — используйте её в конце слов.",
-        background: "/static/img/levels/level2.jpg"
     },
     {
         id: 3,
@@ -152,7 +150,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 300,
         hint: "Слова с 'х' и 'г' могут быть неочевидными.",
-        background: "/static/img/levels/level3.jpg"
     },
     {
         id: 4,
@@ -161,7 +158,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 240,
         hint: "Обратите внимание на 'ь' — его можно использовать в конце слов.",
-        background: "/static/img/levels/level4.jpg"
     },
     {
         id: 5,
@@ -170,7 +166,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 270,
         hint: "Попробуйте слова с 'у' и 'и'.",
-        background: "/static/img/levels/level5.jpg"
     },
     {
         id: 6,
@@ -179,7 +174,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 300,
         hint: "Буква 'э' встречается редко — используйте её в начале слов.",
-        background: "/static/img/levels/level6.jpg"
     },
     {
         id: 7,
@@ -188,7 +182,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 240,
         hint: "Попробуйте слова с 'д' и 'к'.",
-        background: "/static/img/levels/level7.jpg"
     },
     {
         id: 8,
@@ -197,7 +190,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 270,
         hint: "Буква 'ь' может быть сложной — используйте её в середине слов.",
-        background: "/static/img/levels/level8.jpg"
     },
     {
         id: 9,
@@ -206,7 +198,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 300,
         hint: "Слова с 'з' и 'в' могут быть неочевидными.",
-        background: "/static/img/levels/level9.jpg"
     },
     {
         id: 10,
@@ -215,7 +206,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 270,
         hint: "Буква 'ф' встречается редко — используйте её в начале или конце.",
-        background: "/static/img/levels/level10.jpg"
     },
     {
         id: 11,
@@ -224,7 +214,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 300,
         hint: "Попробуйте длинные слова с 'р' и 'т'.",
-        background: "/static/img/levels/level11.jpg"
     },
     {
         id: 12,
@@ -233,7 +222,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 240,
         hint: "Буква 'в' может быть ключевой в некоторых словах.",
-        background: "/static/img/levels/level12.jpg"
     },
     {
         id: 13,
@@ -242,7 +230,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 330,
         hint: "Длинное слово — ищите комбинации из 3-5 букв.",
-        background: "/static/img/levels/level13.jpg"
     },
     {
         id: 14,
@@ -251,7 +238,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 240,
         hint: "Попробуйте слова с 'д' и 'н'.",
-        background: "/static/img/levels/level14.jpg"
     },
     {
         id: 15,
@@ -260,7 +246,6 @@ const GameClient = {
         targets: [4, 6, 9],
         timeLimit: 300,
         hint: "Буква 'б' встречается дважды — используйте её в разных словах.",
-        background: "/static/img/levels/level15.jpg"
     }
 ],
 

@@ -7,7 +7,7 @@
 }
 
 body {
-    background-color: #f5f5f5;
+    background-image: url("/static/img/img.png");
     color: #333;
     line-height: 1.6;
     -webkit-text-size-adjust: 100%;
@@ -30,6 +30,7 @@ body {
 
 .screen {
     background-color: #fff;
+    opacity: 1;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 30px;
