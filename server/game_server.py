@@ -35,11 +35,13 @@ class GameServer:
         # Запускаем фоновую задачу проверки истечения времени игр
         asyncio.create_task(self.check_expired_games())
 
-    async def connect(self, websocket: WebSocket, player_id: str):
-        await websocket.accept()  # установка соединия для обмена данными
+    async def connect(self, websocket: WebSocket, player_id: str, username: str = None):
+        await websocket.accept()
+        # Если username не передан в URL, используем значение по умолчанию
+        default_username = f'Игрок {player_id[:8]}'
         self.connections[player_id] = {
             'ws': websocket,
-            'username': '',
+            'username': username.strip() if username and username.strip() else default_username,
             'room_id': None
         }
 
@@ -50,10 +52,22 @@ class GameServer:
         message_type = data.get('type')
 
         if message_type == 'JOIN':
-            connection['username'] = data.get('username', 'Игрок')
+            new_username = data.get('username', f'Игрок {player_id[:8]}').strip()
+            if not new_username or new_username == 'Игрок':
+                new_username = f'Игрок {player_id[:8]}'
+            connection['username'] = new_username
+            # Обновляем username в комнате, если игрок уже в комнате
+            if connection['room_id'] and connection['room_id'] in self.rooms:
+                room = self.rooms[connection['room_id']]
+                for player in room['players']:
+                    if player['id'] == player_id:
+                        player['username'] = new_username
+                        break
+                await self.update_room_state(connection['room_id'])
             await self.send_to_player(player_id, {
                 'type': 'CONNECTED',
-                'playerId': player_id
+                'playerId': player_id,
+                'username': new_username
             })
         elif message_type == 'CREATE_ROOM':
             await self.create_room(player_id)
@@ -65,7 +79,51 @@ class GameServer:
             await self.process_word(player_id, data.get('word', ''), connection['room_id'])
         elif message_type == 'GAME_FINISHED':
             await self.finish_game(data.get('roomId'))
+        elif message_type == 'PLAYER_EXIT':  # Новый тип сообщения
+            await self.handle_player_exit(player_id, connection['room_id'])
 
+    async def handle_player_exit(self, player_id: str, room_id: str):
+        if not room_id or room_id not in self.rooms:
+            return
+
+        room = self.rooms[room_id]
+        player = next((p for p in room['players'] if p['id'] == player_id), None)
+
+        if not player:
+            return
+
+        # Удаляем игрока из комнаты
+        room['players'] = [p for p in room['players'] if p['id'] != player_id]
+
+        # Уведомляем оставшихся игроков о выходе
+        for other_player in room['players']:
+            await self.send_to_player(other_player['id'], {
+                'type': 'PLAYER_EXIT',
+                'playerId': player_id,
+                'username': player['username']
+            })
+
+        if not room['players']:
+            # Если в комнате не осталось игроков, удаляем комнату
+            del self.rooms[room_id]
+        else:
+            if room['status'] == 'playing':
+                if len(room['players']) < 2:
+                    # Завершаем игру, если остался 1 игрок
+                    await self.finish_game(room_id)
+                else:
+                    # Возвращаем комнату в состояние ожидания
+                    room['status'] = 'waiting'
+                    room['startTime'] = None
+                    room['mainWord'] = self.generate_word(10)
+                    room['availableCells'] = 20
+                    room['timeLimit'] = 300
+                    for p in room['players']:
+                        p['score'] = 0
+                        p['userWords'] = []
+                    await self.update_room_state(room_id)
+            elif room['status'] == 'waiting':
+                await self.update_room_state(room_id)
     async def create_room(self, player_id: str):
         room_id = str(uuid.uuid4())[:8]
         connection = self.connections[player_id]
@@ -280,19 +338,19 @@ class GameServer:
             })
 
     async def update_room_state(self, room_id: str):
-        # обновление состояния комнаты для всех игроков
         if room_id not in self.rooms:
             return
         room = self.rooms[room_id]
         for player in room['players']:
-            # отправляем инфу о других игроках (без своих слов)
             opponents = [
                 {
                     'username': p['username'],
                     'score': p['score'],
-                    'wordsCount': len(p['userWords'])
+                    'wordsCount': len(p['userWords']),
+                    'playerId': p['id']
                 } for p in room['players'] if p['id'] != player['id']
             ]
+            print(f"Отправка состояния для игрока {player['id']}: opponents={opponents}")
             time_left = 0
             if room['status'] == 'playing':
                 elapsed = time.time() - room['startTime']
@@ -318,19 +376,13 @@ class GameServer:
         if player_id not in self.connections:
             return
         connection = self.connections[player_id]
-        # если игрок был в комнате, обновляем состояние комнаты
         room_id = connection.get('room_id')
+
+        # Обрабатываем выход игрока из комнаты
         if room_id and room_id in self.rooms:
-            room = self.rooms[room_id]
-            # удаление игрока из комнаты
-            room['players'] = [p for p in room['players'] if p['id'] != player_id]
-            # если в комнате не осталось игроков, удаляем комнату
-            if not room['players']:
-                del self.rooms[room_id]
-            else:
-                # иначе обновляем состояние комнаты
-                await self.update_room_state(room_id)
-        # удаление соединения
+            await self.handle_player_exit(player_id, room_id)
+
+        # Удаляем соединение
         del self.connections[player_id]
 
     async def send_to_player(self, player_id: str, data: dict):
@@ -430,6 +482,7 @@ class GameServer:
 
         print(f"Слово '{word}' не найдено в Викисловарях")
         return False
+
     async def check_word_in_wiktionary_async(self, word: str) -> bool:
         """
         Асинхронная проверка слова в Wiktionary с исправленными SSL настройками.

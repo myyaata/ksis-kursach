@@ -179,6 +179,18 @@ input[type="text"]:focus {
     border-bottom: 1px solid #eee;
 }
 
+#waiting-players-list {
+    margin: 20px 0;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+}
+
+#waiting-players-list div {
+    padding: 5px;
+    font-size: 16px;
+}
+
 .room-id-container {
     background-color: #f8f9fa;
     border: 1px solid #e0e0e0;

@@ -1,6 +1,7 @@
 import os
 
 
+
 class Dictionary:
     def __init__(self, dictionary_file=None):
         self.words = set()
@@ -37,7 +38,6 @@ class Dictionary:
     def contains(self, word):
         return word.lower() in self.words
 
-    # Python's magic method for 'in' operator
     def __contains__(self, word):
         return self.contains(word)
 
@@ -64,17 +64,6 @@ class Dictionary:
         return len(self.words)
 
     def check_word(self, word: str, main_word: str = None) -> bool:
-        """
-        Проверяет валидность слова.
-        Если main_word задано, проверяет также возможность составить слово из букв основного слова.
-
-        Args:
-            word (str): Слово для проверки
-            main_word (str, optional): Основное слово, из букв которого должно составляться слово
-
-        Returns:
-            bool: True если слово валидно и может быть составлено из основного слова (если указано)
-        """
         word = word.lower().strip()
 
         # Проверяем минимальную длину
@@ -99,10 +88,6 @@ class Dictionary:
         return True
 
     def can_make_word(self, word: str, main_word: str) -> bool:
-        """
-        Проверяет, можно ли составить слово из букв основного слова.
-        (Алиас для check_word с указанием main_word)
-        """
         return self.check_word(word, main_word)
 
 

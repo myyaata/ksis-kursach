@@ -1,11 +1,9 @@
 import uuid
-
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from typing import Optional
 import logging
 
 # Настройка логирования
@@ -16,13 +14,13 @@ from server.game_server import GameServer
 
 app = FastAPI()
 
-# монтирование статических файлов
+# Монтирование статических файлов
 app.mount("/static", StaticFiles(directory="client/static"), name="static")
 
-# шаблоны
+# Шаблоны
 templates = Jinja2Templates(directory="client/templates")
 
-# создание экземпляра игрового сервера
+# Создание экземпляра игрового сервера
 game_server = GameServer()
 
 
@@ -32,17 +30,13 @@ async def get_index(request: Request):
 
 
 @app.websocket("/ws/{player_id}")
-async def websocket_endpoint(websocket: WebSocket, player_id: str):
-    await game_server.connect(websocket, player_id)
-
+async def websocket_endpoint(websocket: WebSocket, player_id: str, username: Optional[str] = None):
+    await game_server.connect(websocket, player_id, username)
     try:
         while True:
             data = await websocket.receive_json()
             await game_server.handle_client_message(player_id, data)
     except WebSocketDisconnect:
-        await game_server.handle_disconnect(player_id)
-    except Exception as e:
-        print(f"Ошибка: {e}")
         await game_server.handle_disconnect(player_id)
 
 

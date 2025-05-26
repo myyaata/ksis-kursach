@@ -12,6 +12,7 @@ const GameClient = {
         score: 0,              // Набранные очки
         level: 1,              // Текущий уровень
         playerId: "",          // ID игрока
+        username: "",          // Имя игрока
         roomId: "",            // ID комнаты для мультиплеера
         opponents: [],         // Данные о других игроках в комнате
         practiceMode: false,   // Режим практики (одиночная игра)
@@ -356,6 +357,11 @@ const GameClient = {
                 this.showMessage('ID комнаты скопирован в буфер обмена');
             });
 
+            document.getElementById('exit-game-btn').addEventListener('click', () => {
+            console.log('Нажата кнопка выхода из игры');
+            this.exitGame();
+            });
+
             document.getElementById('copy-waiting-room-id').addEventListener('click', () => {
             const roomId = document.getElementById('waiting-room-id').textContent;
             this.copyToClipboard(roomId);
@@ -547,6 +553,41 @@ const GameClient = {
         }
     },
 
+    exitGame: function() {
+        console.log('Выход из игры...');
+        this.stopTimer();
+
+        // Очищаем состояние игры
+        const previousScreen = this.state.practiceMode || this.state.levelsMode ? 'lobby-screen' : 'waiting-room-screen';
+        this.state.userWords = [];
+        this.state.score = 0;
+        this.state.timeLeft = 0;
+        this.state.mainWord = '';
+        this.state.gameStarted = false;
+        this.state.gameFinished = true;
+        this.state.earnedStars = 0;
+
+        if (!this.state.practiceMode && !this.state.levelsMode) {
+            // В мультиплеерном режиме отправляем сообщение серверу
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: 'PLAYER_EXIT',
+                    roomId: this.state.roomId,
+                    playerId: this.state.playerId
+                }));
+            }
+        }
+
+        // Сбрасываем режимы
+        this.state.practiceMode = false;
+        this.state.levelsMode = false;
+        this.state.currentLevelData = null;
+
+        // Возвращаемся на предыдущий экран
+        this.showScreen(previousScreen);
+        this.showMessage('Вы вышли из игры', 'info');
+    },
+
     setLevelBackground: function(backgroundUrl) {
         if (!backgroundUrl) return;
 
@@ -666,6 +707,7 @@ const GameClient = {
     // Вход в игру
     login: function(username) {
         console.log('Вход в игру с именем:', username);
+        this.state.username = username; // Сохраняем username локально
         // Подключение к WebSocket
         this.connectWebSocket(username);
         this.showScreen('lobby-screen');
@@ -682,7 +724,7 @@ const GameClient = {
         try {
             this.socket = new WebSocket(wsUrl);
         } catch (e) {
-            console.error('Ошибка при создании WebSocket:', e);
+            console.error('Ошибкаа при создании WebSocket:', e);
             this.showError('Не удалось подключиться к серверу: ' + e.message);
             return;
         }
@@ -961,6 +1003,9 @@ const GameClient = {
         switch(data.type) {
             case 'CONNECTED':
                 console.log('Успешное подключение к серверу');
+                this.state.playerId = data.playerId;
+                this.state.username = data.username;
+                this.showMessage(`Добро пожаловать, ${data.username}!`, 'success');
                 break;
 
             case 'ROOM_CREATED':
@@ -1026,6 +1071,10 @@ const GameClient = {
                 this.endGame(data.results);
                 break;
 
+            case 'PLAYER_EXIT':
+                this.handlePlayerExit(data);
+                break;
+
             case 'ERROR':
                 this.showError(data.message);
                 break;
@@ -1034,6 +1083,27 @@ const GameClient = {
                 console.log('Неизвестный тип сообщения:', data.type);
         }
     },
+
+    handlePlayerExit: function(data) {
+        const { playerId, username } = data;
+        console.log(`Игрок ${username} (ID: ${playerId}) покинул игру`);
+
+        // Показываем уведомление с username
+        this.showMessage(`Игрок ${username} покинул игру`, 'warning', 5000);
+
+        // Обновляем список соперников
+        this.state.opponents = this.state.opponents.filter(opponent => opponent.playerId !== playerId);
+        this.renderGameState();
+
+        // Если игра активна, возвращаемся в комнату ожидания
+        if (this.state.gameStarted && !this.state.gameFinished) {
+            this.stopTimer();
+            this.state.gameStarted = false;
+            this.state.gameFinished = true;
+            this.showScreen('waiting-room-screen');
+            this.updatePlayersList();
+        }
+},
 
     showWaitingRoom: function() {
         this.showScreen('waiting-room-screen');
@@ -1044,11 +1114,26 @@ const GameClient = {
     updatePlayersList: function() {
         const playersList = document.getElementById('waiting-players-list');
         if (playersList) {
-            // Здесь должен быть список игроков из состояния сервера
-            // Пока показываем базовую информацию
-            playersList.innerHTML = `<div>Ожидание игроков... (${this.state.opponents.length + 1}/2)</div>`;
+            playersList.innerHTML = '';
+            // Добавляем текущего игрока
+            const currentPlayerElement = document.createElement('div');
+            currentPlayerElement.textContent = `Вы: ${this.state.username || 'Игрок'}`;
+            playersList.appendChild(currentPlayerElement);
+
+            // Добавляем соперников
+            this.state.opponents.forEach(opponent => {
+                const opponentElement = document.createElement('div');
+                opponentElement.textContent = opponent.username;
+                playersList.appendChild(opponentElement);
+            });
+
+            // Показываем общее количество игроков
+            const totalPlayers = this.state.opponents.length + 1;
+            const statusElement = document.createElement('div');
+            statusElement.textContent = `Игроков: ${totalPlayers}/2`;
+            playersList.appendChild(statusElement);
         }
-},
+    },
 
     // Создание новой комнаты
     createRoom: function() {
@@ -1208,12 +1293,14 @@ const GameClient = {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify({
                 type: 'LEAVE_ROOM',
-                roomId: this.state.roomId
+                roomId: this.state.roomId,
+                playerId: this.state.playerId
             }));
         }
         this.state.roomId = "";
         this.state.opponents = [];
         document.getElementById('room-id-display').classList.add('hidden');
+        this.showMessage('Вы покинули комнату', 'info');
     },
 
     startMultiplayerGame: function() {
@@ -1478,7 +1565,6 @@ const GameClient = {
             this.state.opponents.forEach(opponent => {
                 const opponentElement = document.createElement('div');
                 opponentElement.className = 'opponent';
-                // ИСПРАВЛЕНИЕ: показываем актуальный счет и количество слов
                 const wordsCount = opponent.wordsCount || (opponent.foundWords ? opponent.foundWords.length : 0);
                 opponentElement.innerHTML = `
                     <div class="opponent-name">${opponent.username}</div>
@@ -1667,7 +1753,6 @@ const GameClient = {
             resultsList.appendChild(resultElement);
         });
     },
-
     // Показать определенный экран
     showScreen: function(screenId) {
         console.log('Показ экрана:', screenId);

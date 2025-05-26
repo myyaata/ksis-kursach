@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <div id="login-screen" class="screen">
-            <h1>Игра слов</h1>
+            <h1>СловА из слОва</h1>
             <div class="form-group">
                 <label for="username-input">Ваше имя:</label>
                 <input type="text" id="username-input" placeholder="Введите имя">
@@ -44,6 +44,16 @@
                     </svg>
                 </button>
             </div>
+            <button id="exit-game-btn" style="
+                        background: #dc3545;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        margin: 10px;
+                    ">Выйти из игры</button>
             <div class="game-header">
                 <div class="main-word-container">
                     <h2>Основное слово: <span id="main-word"></span></h2>
@@ -128,7 +138,6 @@
                 <!-- Список игроков будет добавлен динамически -->
             </div>
         </div>
-
         <div class="waiting-actions">
             <button id="start-multiplayer-game" class="btn btn-primary">Начать игру</button>
             <button id="back-to-lobby-from-waiting" class="btn btn-secondary">Вернуться в лобби</button>
